@@ -8,7 +8,7 @@ const app = express();
 //   res.send({ name: "abhay", lastname: "thanak" });
 //   next();
 // });
-app.use("/user", middleAuth);
+// app.use("/user", middleAuth);
 
 app.get("/user", (req, res) => {
   res.send("alldata fetch");
