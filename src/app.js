@@ -5,6 +5,7 @@ const app = express();
 // app.use("/", (req, res) => {
 //   res.send("hello 3000 server 12223");
 // });
+
 app.get("/user", (req, res) => {
   res.send({ firstName: "abhay", lastName: "thanak" });
 });
