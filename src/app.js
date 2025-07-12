@@ -29,8 +29,12 @@ app.post("/signup", async (req, res) => {
     gender: "male",
   });
 
-  await user.save();
-  res.send(user);
+  try {
+    await user.save();
+    res.send(user);
+  } catch (error) {
+    res.status(400).send("error saving the user:" + error.message);
+  }
 });
 
 connectDB()
