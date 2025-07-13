@@ -5,6 +5,8 @@ const Users = require("./models/user");
 
 const app = express();
 
+app.use(express.json());
+
 // app.use("/user", (req, res, next) => {
 //   console.log("1 response");
 //   res.send({ name: "abhay", lastname: "thanak" });
@@ -18,20 +20,39 @@ const app = express();
 // app.get("/user/id", (req, res) => {
 //   res.send("alldata fetch in id");
 // });
+//  get user by there email
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
+  try {
+    console.log(userEmail);
+    const user = await Users.findOne({ emailId: userEmail });
+    if (!user) {
+      res.status(404).send("user not found");
+    } else {
+      res.send(user);
+    }
+  } catch (error) {
+    res.send(error);
+  }
+});
+
+//  feed api GET feed api - get all users from the database
+
+app.get("/feed", async (req, res) => {
+  try {
+    const user = await Users.find({});
+    res.send(user);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
 
 app.post("/signup", async (req, res) => {
-  const user = new Users({
-    firstName: "sachin",
-    lastName: "purohit",
-    emailId: "abhaythanak@gmail.com",
-    password: "abhay@123",
-    age: 28,
-    gender: "male",
-  });
+  const user = new Users(req.body);
 
   try {
     await user.save();
-    res.send(user);
+    res.send(" added succefully");
   } catch (error) {
     res.status(400).send("error saving the user:" + error.message);
   }
