@@ -58,6 +58,45 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+app.patch("/user/:userId", async (req, res) => {
+  // const updateUserId = req.body.userId;
+  const updateUserId = req.params?.userId;
+  const data = req.body;
+  try {
+    const allowedUpdate = ["about", "gender", "age", "skills", "photoUrl"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      allowedUpdate.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("update not allowed");
+    }
+    if (data?.skills.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+    //  const user = await Users.findByIdAndUpdate(updateUserId, data); or add 1 more field document view
+    const user = await Users.findByIdAndUpdate(updateUserId, data, {
+      returnDocument: "after",
+      runValidators: true,
+    }); // after or before
+    res.send(" update succefully" + user);
+    console.log(user);
+  } catch (error) {
+    res.status(400).send("error saving the user:" + error.message);
+  }
+});
+
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+
+  try {
+    // const user = await Users.findByIdAndDelete({_id:userId}) or
+    const user = await Users.findByIdAndDelete(userId);
+    res.send(" deleted succefully");
+  } catch (error) {
+    res.status(400).send("error saving the user:" + error.message);
+  }
+});
+
 connectDB()
   .then(() => {
     console.log("database connected");
