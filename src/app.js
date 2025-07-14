@@ -59,7 +59,7 @@ app.post("/signup", async (req, res) => {
 });
 
 app.patch("/user/:userId", async (req, res) => {
-  // const updateUserId = req.body.userId;
+  // const updateUserId = req.body.userId;   // never trust req.body
   const updateUserId = req.params?.userId;
   const data = req.body;
   try {
