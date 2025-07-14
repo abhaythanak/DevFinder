@@ -2,6 +2,9 @@ const express = require("express");
 const connectDB = require("./config/database");
 const { middleAuth } = require("./middleware/auth");
 const Users = require("./models/user");
+const { validationSignUpData } = require("../utils/validation");
+const bcrypt = require("bcrypt");
+const User = require("./models/user");
 
 const app = express();
 
@@ -47,10 +50,44 @@ app.get("/feed", async (req, res) => {
   }
 });
 
-app.post("/signup", async (req, res) => {
-  const user = new Users(req.body);
-
+app.post("/login", async (req, res) => {
+  // "password":"Gta@2015",
+  //   "emailId":"Abhay@gmail.com",
   try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      throw new Error("Invalid Credentials");
+    }
+    if (user || validPassword) {
+      res.send("Login Successful !!!");
+    }
+  } catch (error) {
+    res.status(400).send("error saving the user:" + error.message);
+  }
+});
+app.post("/signup", async (req, res) => {
+  try {
+    //  validation of data
+    validationSignUpData(req);
+
+    // Encrypt  the password
+    const { password, firstName, lastName, emailId } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // creating new instances of the user model
+    // const user = new Users(req.body);
+    const user = new Users({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
+
     await user.save();
     res.send(" added succefully");
   } catch (error) {
