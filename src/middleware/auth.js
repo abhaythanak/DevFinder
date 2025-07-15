@@ -1,4 +1,4 @@
-const middleAuth =  (req, res, next) => {
+const middleAuth = (req, res, next) => {
   const token = "xyz";
   const isAuth = token === "xyz";
   if (!isAuth) {
@@ -6,8 +6,8 @@ const middleAuth =  (req, res, next) => {
   } else {
     next();
   }
-}
+};
 
 module.exports = {
-    middleAuth,
-}
+  middleAuth,
+};

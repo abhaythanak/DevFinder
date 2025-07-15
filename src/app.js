@@ -4,11 +4,15 @@ const { middleAuth } = require("./middleware/auth");
 const Users = require("./models/user");
 const { validationSignUpData } = require("../utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+
 const User = require("./models/user");
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 // app.use("/user", (req, res, next) => {
 //   console.log("1 response");
@@ -50,6 +54,29 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+app.get("/profile", async (req, res) => {
+  try {
+    const cookies = req.cookies;
+    const { token } = cookies;
+    if (!token) {
+      throw new Error("Invalid token");
+    }
+    const decodedMessage = await jwt.verify(token, "edght87etgh7se96t");
+    console.log(decodedMessage);
+    //  u can get data of that user
+    // @ts-ignore
+    const { _id } = decodedMessage;
+    // console.log("loggined user is: " + _id);
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new Error("User Not Found");
+    }
+    res.send(user);
+  } catch (error) {
+    res.status(400).send("error saving the user:" + error.message);
+  }
+});
+
 app.post("/login", async (req, res) => {
   // "password":"Gta@2015",
   //   "emailId":"Abhay@gmail.com",
@@ -64,6 +91,13 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid Credentials");
     }
     if (user || validPassword) {
+      // create a JWT Token
+      const token = await jwt.sign({ _id: user._id }, "edght87etgh7se96t"); // 1 what u wont to hide and 2 is secreate key
+      console.log(token);
+
+      //  Add the token to cookie and send the response back to the user
+      // res.cookie("token", "fgkujhorig57ger57sg");
+      res.cookie("token", token);
       res.send("Login Successful !!!");
     }
   } catch (error) {
@@ -112,9 +146,10 @@ app.patch("/user/:userId", async (req, res) => {
     }
     //  const user = await Users.findByIdAndUpdate(updateUserId, data); or add 1 more field document view
     const user = await Users.findByIdAndUpdate(updateUserId, data, {
-      returnDocument: "after",
+      returnDocument: "after", // after or before
       runValidators: true,
-    }); // after or before
+    });
+
     res.send(" update succefully" + user);
     console.log(user);
   } catch (error) {
