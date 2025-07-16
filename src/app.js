@@ -1,6 +1,7 @@
+// @ts-nocheck
 const express = require("express");
 const connectDB = require("./config/database");
-const { middleAuth } = require("./middleware/auth");
+const { middleAuth, userAuth } = require("./middleware/auth");
 const Users = require("./models/user");
 const { validationSignUpData } = require("../utils/validation");
 const bcrypt = require("bcrypt");
@@ -54,24 +55,21 @@ app.get("/feed", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const cookies = req.cookies;
-    const { token } = cookies;
-    if (!token) {
-      throw new Error("Invalid token");
-    }
-    const decodedMessage = await jwt.verify(token, "edght87etgh7se96t");
-    console.log(decodedMessage);
-    //  u can get data of that user
-    // @ts-ignore
-    const { _id } = decodedMessage;
-    // console.log("loggined user is: " + _id);
-    const user = await User.findById(_id);
-    if (!user) {
-      throw new Error("User Not Found");
-    }
+    const user = req.user;
+
     res.send(user);
+  } catch (error) {
+    res.status(400).send("error saving the user:" + error.message);
+  }
+});
+
+app.post("/sendconnectionrequest", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+
+    res.send(user.firstName + " sent the connection request");
   } catch (error) {
     res.status(400).send("error saving the user:" + error.message);
   }
@@ -86,18 +84,23 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid Credentials");
     }
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await user.validatePassword(password);
     if (!validPassword) {
       throw new Error("Invalid Credentials");
     }
     if (user || validPassword) {
       // create a JWT Token
-      const token = await jwt.sign({ _id: user._id }, "edght87etgh7se96t"); // 1 what u wont to hide and 2 is secreate key
-      console.log(token);
+      const token = await user.getJWT();
+      // const token = await jwt.sign({ _id: user._id }, "edght87etgh7se96t", {
+      //   expiresIn: "1d", // expire token 1d or add 1h -> hour
+      // }); // 1 what u wont to hide and 2 is secreate key
+      // console.log(token);
 
       //  Add the token to cookie and send the response back to the user
       // res.cookie("token", "fgkujhorig57ger57sg");
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000),
+      });
       res.send("Login Successful !!!");
     }
   } catch (error) {
