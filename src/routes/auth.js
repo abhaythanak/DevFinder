@@ -58,5 +58,9 @@ authRouter.post("/logout", async (req, res) => {
   });
   res.send("logout Successful");
 });
+authRouter.patch("/forgotpassword/:userId", async (req, res) => {
+  const { password } = req.body;
+  const { userId } = req.params;
+});
 
 module.exports = authRouter;
