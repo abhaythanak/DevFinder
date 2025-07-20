@@ -47,3 +47,5 @@ useRouter.get("./user/connections", userAuth, async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+
+module.exports = useRouter;
