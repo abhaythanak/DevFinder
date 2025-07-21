@@ -48,4 +48,16 @@ useRouter.get("./user/connections", userAuth, async (req, res) => {
   }
 });
 
+useRouter.get("./user/feed", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    // find all connection requests (sent + received)
+    const connectionRequest = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
 module.exports = useRouter;
