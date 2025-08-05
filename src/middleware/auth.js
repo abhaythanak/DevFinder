@@ -18,7 +18,8 @@ const userAuth = async (req, res, next) => {
     const { token } = cookies;
     // read the valid token
     if (!token) {
-      throw new Error("Invalid Token");
+      // throw new Error("");
+      return res.status(401).send("Please Login");
     }
 
     const decodedObj = await jwt.verify(token, "edght87etgh7se96t");

@@ -25,7 +25,7 @@ authRouter.post("/login", async (req, res) => {
       res.send(user);
     }
   } catch (error) {
-    res.status(400).send("error saving the user:" + error.message);
+    res.status(400).send("Error " + error.message);
   }
 });
 authRouter.post("/signup", async (req, res) => {
@@ -49,7 +49,8 @@ authRouter.post("/signup", async (req, res) => {
     await user.save();
     res.send(" added succefully");
   } catch (error) {
-    res.status(400).send("error saving the user:" + error.message);
+    // res.status(400).send("error saving the user:" + error.message);
+    res.status(400).send(error.message);
   }
 });
 authRouter.post("/logout", async (req, res) => {
