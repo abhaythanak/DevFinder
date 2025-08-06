@@ -39,7 +39,7 @@ authRouter.post("/signup", async (req, res) => {
 
     // creating new instances of the user model
     // const user = new Users(req.body);
-    const user = new Users({
+    const user = new User({
       firstName,
       lastName,
       emailId,
